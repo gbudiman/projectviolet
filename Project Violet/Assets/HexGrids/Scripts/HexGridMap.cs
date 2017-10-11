@@ -4,6 +4,12 @@ using UnityEngine;
 
 public class HexGridMap : MonoBehaviour {
   public Dictionary<int, Dictionary<int, HexadrantTiles>> radius_tiles;
+  private Camera main_camera;
+  const float camera_movement_speed = 0.25f;
+  const float zoom_factor = 2f;
+  const float mouse_pan_factor = -0.67f;
+  enum MouseState { LeftPressed, RightPressed, None };
+  MouseState mouse_state;
   
 
 	// Use this for initialization
@@ -12,14 +18,47 @@ public class HexGridMap : MonoBehaviour {
     SkillLoader skl = GetComponent<SkillLoader>();
     skl.Build();
     SkillStruct ss = skl.get_struct();
+    main_camera = GameObject.Find("Main Camera").GetComponent<Camera>();
+    mouse_state = MouseState.None;
 
     apply_to_hex_grid_map(ss);
 	}
 	
 	// Update is called once per frame
 	void Update () {
-		
+    update_camera();
 	}
+
+  private void update_camera() {
+    Vector3 current_position = main_camera.transform.position;
+    Vector3 target_position = new Vector3(0,0,0);
+    if (Input.GetKey(KeyCode.W)) {
+      main_camera.transform.Translate(0, camera_movement_speed, 0);
+    } else if (Input.GetKey(KeyCode.S)) {
+      main_camera.transform.Translate(0, -camera_movement_speed, 0);
+    }
+
+    if (Input.GetKey(KeyCode.A)) {
+      main_camera.transform.Translate(-camera_movement_speed, 0, 0);
+    } else if (Input.GetKey(KeyCode.D)) {
+      main_camera.transform.Translate(camera_movement_speed, 0, 0);
+    }
+
+    if (Input.GetMouseButtonDown(1)) {
+      mouse_state = MouseState.RightPressed;
+    }
+
+    if (Input.GetMouseButtonUp(1)) {
+      mouse_state = MouseState.None;
+    }
+
+    float wheel = Input.GetAxis("Mouse ScrollWheel");
+    main_camera.orthographicSize -= (wheel * zoom_factor);
+
+    if (mouse_state == MouseState.RightPressed) {
+      main_camera.transform.Translate(Input.GetAxis("Mouse X") * mouse_pan_factor, Input.GetAxis("Mouse Y") * mouse_pan_factor, 0);
+    }
+  }
 
   private void make_map(int r) {
     radius_tiles = new Dictionary<int, Dictionary<int, HexadrantTiles>>();
