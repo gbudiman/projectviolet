@@ -5,23 +5,27 @@ using UnityEngine;
 public class HexGridMap : MonoBehaviour {
   public Dictionary<int, Dictionary<int, HexadrantTiles>> radius_tiles;
   private Camera main_camera;
+  private System.Random randomizer;
   const float camera_movement_speed = 0.25f;
   const float zoom_factor = 2f;
   const float mouse_pan_factor = -0.67f;
+  int max_radius;
   enum MouseState { LeftPressed, RightPressed, None };
   MouseState mouse_state;
-  
 
 	// Use this for initialization
 	void Start () {
-    make_map(8);
+    randomizer = new System.Random();
+    max_radius = 8;
+    make_map(max_radius);
     SkillLoader skl = GetComponent<SkillLoader>();
     skl.Build();
     SkillStruct ss = skl.get_struct();
     main_camera = GameObject.Find("Main Camera").GetComponent<Camera>();
     mouse_state = MouseState.None;
 
-    apply_to_hex_grid_map(ss);
+    apply_skills_to_hex_grid_map(ss);
+    populate_rest();
 	}
 	
 	// Update is called once per frame
@@ -86,7 +90,7 @@ public class HexGridMap : MonoBehaviour {
         }
 
         radius_tiles[radius][hexadrant].Add(hex_sprite);
-        colorize(hex_sprite, r);
+        //colorize(hex_sprite, r);
 
         if (z > r) break;
       }
@@ -116,20 +120,51 @@ public class HexGridMap : MonoBehaviour {
     }
   }
 
-  private void apply_to_hex_grid_map(SkillStruct ss) {
+  private void apply_skills_to_hex_grid_map(SkillStruct ss) {
     foreach (KeyValuePair<string, SkillUnit> skill in ss.get_data()) {
       string skill_id = skill.Key;
       SkillUnit skill_data = skill.Value;
 
       GameObject gt = get_available_tile(skill_data.radius, skill_data.hexadrant);
+      HexGrid hg = gt.GetComponent<HexGrid>();
       TextMesh tm = gt.GetComponentInChildren<TextMesh>();
       tm.text = skill_data.skill_name;
+      hg.set_color(TileType.preset_skill, max_radius);
+    }
+  }
+
+  private void populate_rest() {
+    foreach (var radius_tile in radius_tiles.Values) {
+      foreach (KeyValuePair<int, HexadrantTiles> hexadrant_tile in radius_tile) {
+        List<GameObject> remaining_tiles = hexadrant_tile.Value.get_unused();
+
+        foreach (var tile in remaining_tiles) {
+          int randval = randomizer.Next(0, 100);
+          TextMesh tm = tile.GetComponentInChildren<TextMesh>();
+          HexGrid hg = tile.GetComponent<HexGrid>();
+
+          if (randval == 99) {
+            tm.text = "Any Skill";
+            print("BINGO!");
+            hg.set_color(TileType.any_skill, max_radius);
+          } else if (randval < 70) {
+            tm.text = "Maj Stat";
+            hg.set_color(TileType.fixed_stat, max_radius);
+          } else {
+            tm.text = "Any Stat";
+            hg.set_color(TileType.any_stat, max_radius);
+          }
+
+          // hg.set_color(TileType.any_stat, max_radius);
+        }
+        
+      }
     }
   }
 
   private GameObject get_available_tile(int radius, int hexadrant) {
     HexadrantTiles ht = radius_tiles[radius][hexadrant];
-    GameObject gt = ht.select_random(true);
+    GameObject gt = ht.select_random(randomizer, true);
 
     return gt;
   }
@@ -138,12 +173,10 @@ public class HexGridMap : MonoBehaviour {
 public class HexadrantTiles {
   public List<GameObject> data;
   public List<int> unused_indices;
-  private System.Random randomizer;
 
   public HexadrantTiles() {
     data = new List<GameObject>();
     unused_indices = new List<int>();
-    randomizer = new System.Random();
   }
 
   public void Add(GameObject w) {
@@ -151,7 +184,7 @@ public class HexadrantTiles {
     unused_indices.Add(unused_indices.Count);
   }
 
-  public GameObject select_random(bool mark_used=false) {
+  public GameObject select_random(System.Random randomizer, bool mark_used=false) {
     int l = unused_indices.Count;
     int unusedref = randomizer.Next(0, l);
     int indexref = unused_indices[unusedref];
@@ -162,4 +195,16 @@ public class HexadrantTiles {
     
     return data[indexref];
   }
+
+  public List<GameObject> get_unused() {
+    List<GameObject> unused = new List<GameObject>();
+
+    foreach (var i in unused_indices) {
+      unused.Add(data[i]);
+    }
+
+    return unused;
+  }
 }
+
+public enum TileType { preset_skill, any_stat, fixed_stat, any_skill };

@@ -20,7 +20,6 @@ public class HexGrid : MonoBehaviour {
 	}
 
   public Vector3 spawn(int x, int y, int z) {
-    //GameObject hex_visual = (GameObject)Instantiate(Resources.Load("HexGrids/HexVisual"));
 
     hex_grid_coord = new HexGridCoord(x, y, z);
     Vector3 pl = hex_grid_coord.get_planar_coordinate();
@@ -34,5 +33,42 @@ public class HexGrid : MonoBehaviour {
     xyz_coord = pl;
     radius = hex_grid_coord.get_radius();
     hexadrant = hex_grid_coord.get_hexadrant();
+  }
+
+  public void set_color(TileType type, int max_radius) {
+    float hue = 0f;
+    float saturation = 0f;
+    float lightness = 0f;
+    float alpha = 0.75f;
+    SpriteRenderer sr = GetComponent<SpriteRenderer>();
+    TextMesh tm = GetComponentInChildren<TextMesh>();
+
+    if (hexadrant == -1) {
+      lightness = (float)radius / (float)max_radius * 0.25f + 0.5f;
+      alpha = 1.0f;
+    } else {
+      if (type == TileType.preset_skill) {
+        hue = (hexadrant - 1) * 60f / 360f;
+        //lightness = (float)radius / (float)max_radius * 0.25f;
+        //saturation = 0.5f;
+        lightness = 0.5f;
+        saturation = 0.75f;
+      } else if (type == TileType.fixed_stat) {
+        hue = 0f;
+        saturation = 0f;
+        lightness = 0.1f;
+      } else if (type == TileType.any_stat) {
+        hue = 0f;
+        saturation = 0f;
+        lightness = 0.25f;
+        //tm.color = new Color(0f, 0f, 0f);
+      } else {
+        lightness = 1f;
+        tm.color = new Color(0f, 0f, 0f);
+      }
+    }
+
+    Color c = Color.HSVToRGB(hue, saturation, lightness);
+    sr.color = new Color(c.r, c.g, c.b, alpha);
   }
 }
