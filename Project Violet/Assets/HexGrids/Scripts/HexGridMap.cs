@@ -25,11 +25,28 @@ public class HexGridMap : MonoBehaviour {
 
         Vector3 pl = hex_grid.spawn(x, y, z);
         hex_sprite.transform.position = pl;
+        colorize(hex_sprite);
 
         if (z > r) break;
       }
 
      
+    }
+  }
+
+  private void colorize(GameObject hex_sprite) {
+    HexGrid hex_grid = hex_sprite.GetComponent<HexGrid>();
+    SpriteRenderer sprite = hex_grid.GetComponent<SpriteRenderer>();
+
+    int hexadrant = hex_grid.hexadrant;
+
+    switch (hexadrant) {
+      case 1: sprite.color = new Color(1f, 0f, 0f); break;
+      case 2: sprite.color = new Color(0f, 1f, 0f); break;
+      case 3: sprite.color = new Color(0f, 0f, 1f); break;
+      case 4: sprite.color = new Color(0.5f, 0f, 0f); break;
+      case 5: sprite.color = new Color(0f, 0.5f, 0f); break;
+      case 6: sprite.color = new Color(0f, 0f, 0.5f); break;
     }
   }
 }
