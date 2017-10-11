@@ -124,7 +124,7 @@ TextMesh:
   m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
   m_Color:
     serializedVersion: 2
-    rgba: 4281874488
+    rgba: 4294967295
 --- !u!114 &114201501041510004
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -138,6 +138,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   abc_coord: {x: 0, y: 0, z: 0}
   xyz_coord: {x: 0, y: 0, z: 0}
+  hexadrant: 0
+  radius: 0
 --- !u!212 &212071990382256508
 SpriteRenderer:
   m_ObjectHideFlags: 1
