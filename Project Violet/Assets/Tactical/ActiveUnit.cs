@@ -32,15 +32,25 @@ public class ActiveUnit{
   }
 
   void update_position_on_timeline() {
-    set_marker_position(compute_marker_position(action_point));
+    set_marker_position(compute_marker_position());
   }
 
   void set_marker_position(float x) {
     marker_transform.anchoredPosition = new Vector3(x, -330, 0);
   }
 
-  public float compute_marker_position(float target_ap) {
-    float estimation = (100f - target_ap) / ap_increment;
+  public Dictionary<string, KeyValuePair<string, float>> generate_actions() {
+    Dictionary<string, KeyValuePair<string, float>> actions = new Dictionary<string, KeyValuePair<string, float>>();
+
+    actions.Add("Skip Turn", new KeyValuePair<string, float>("skip", 100f));
+    actions.Add("Defend", new KeyValuePair<string, float>("defend", 50f));
+    actions.Add("Attack", new KeyValuePair<string, float>("attack", 100f));
+
+    return actions;
+  }
+
+  public float compute_marker_position() {
+    float estimation = (100f - action_point) / ap_increment;
     if (estimation > segment) {
       return -670f;
     } else {
