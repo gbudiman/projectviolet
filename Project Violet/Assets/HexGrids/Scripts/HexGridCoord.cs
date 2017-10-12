@@ -66,6 +66,33 @@ public class HexGridCoord {
     return -1;
   }
 
+  public int get_dihexadrant() {
+    int hexadrant = get_hexadrant();
+
+    switch(hexadrant) {
+      case 1:
+        if (a > b) return 11;
+        else if (a < b) return 12; break;
+      case 2:
+        if (a > c) return 21;
+        else if (a < c) return 22; break;
+      case 3:
+        if (b > c) return 31;
+        else if (b < c) return 32; break;
+      case 4:
+        if (a < b) return 41;
+        else if (a > b) return 42; break;
+      case 5:
+        if (a < c) return 51;
+        else if (a > c) return 52; break;
+      case 6:
+        if (b < c) return 61;
+        else if (b > c) return 62; break;
+    }
+
+    return -1;
+  }
+
   public int get_radius() {
     return (Mathf.Abs(a) + Mathf.Abs(b) + Mathf.Abs(c)) / 2;
   }

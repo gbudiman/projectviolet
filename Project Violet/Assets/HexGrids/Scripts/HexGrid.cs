@@ -8,6 +8,7 @@ public class HexGrid : MonoBehaviour {
   public Vector3 xyz_coord;
   public int hexadrant;
   public int radius;
+  const int dihex_radius_cutoff = 14;
 
 	// Use this for initialization
 	void Start () {
@@ -32,7 +33,12 @@ public class HexGrid : MonoBehaviour {
     abc_coord = new Vector3(x, y, z);
     xyz_coord = pl;
     radius = hex_grid_coord.get_radius();
-    hexadrant = hex_grid_coord.get_hexadrant();
+
+    if (radius < dihex_radius_cutoff) {
+      hexadrant = hex_grid_coord.get_hexadrant();
+    } else {
+      hexadrant = hex_grid_coord.get_dihexadrant();
+    }
   }
 
   public void set_color(TileType type, int max_radius) {

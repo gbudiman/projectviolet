@@ -16,7 +16,7 @@ public class HexGridMap : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
     randomizer = new System.Random();
-    max_radius = 8;
+    max_radius = 24;
     make_map(max_radius);
     SkillLoader skl = GetComponent<SkillLoader>();
     skl.Build();
@@ -125,11 +125,39 @@ public class HexGridMap : MonoBehaviour {
       string skill_id = skill.Key;
       SkillUnit skill_data = skill.Value;
 
-      GameObject gt = get_available_tile(skill_data.radius, skill_data.hexadrant);
-      HexGrid hg = gt.GetComponent<HexGrid>();
-      TextMesh tm = gt.GetComponentInChildren<TextMesh>();
-      tm.text = skill_data.skill_name;
-      hg.set_color(TileType.preset_skill, max_radius);
+      int target_hexadrant = skill_data.hexadrant;
+      List<int> hxds = new List<int>();
+      int hxd_a = target_hexadrant;
+      int hxd_b = target_hexadrant;
+
+      if (target_hexadrant == -1) {
+        foreach (int k in radius_tiles[skill_data.radius].Keys) {
+          hxds.Add(k);
+        }
+      } else {
+        hxds.Add(target_hexadrant);
+      }
+
+      //for (int hxd = hxd_a; hxd <= hxd_b; hxd++) {
+      foreach (int hxd in hxds) { 
+        if (skill_data.bias_method == "border") {
+          foreach (GameObject gt in get_all_tiles(skill_data.radius, hxd)) {
+            HexGrid hg = gt.GetComponent<HexGrid>();
+            TextMesh tm = gt.GetComponentInChildren<TextMesh>();
+
+            tm.text = skill_data.skill_name;
+            hg.set_color(TileType.profession_border, max_radius);
+          }
+        } else {
+          GameObject gt = get_available_tile(skill_data.radius, hxd);
+          HexGrid hg = gt.GetComponent<HexGrid>();
+          TextMesh tm = gt.GetComponentInChildren<TextMesh>();
+          tm.text = skill_data.skill_name;
+          hg.set_color(TileType.preset_skill, max_radius);
+        }
+        
+      }
+      
     }
   }
 
@@ -143,11 +171,11 @@ public class HexGridMap : MonoBehaviour {
           TextMesh tm = tile.GetComponentInChildren<TextMesh>();
           HexGrid hg = tile.GetComponent<HexGrid>();
 
-          if (randval == 99) {
+          /*if (randval == 99) {
             tm.text = "Any Skill";
             print("BINGO!");
             hg.set_color(TileType.any_skill, max_radius);
-          } else if (randval < 70) {
+          } else*/ if (randval < 70) {
             tm.text = "Maj Stat";
             hg.set_color(TileType.fixed_stat, max_radius);
           } else {
@@ -167,6 +195,10 @@ public class HexGridMap : MonoBehaviour {
     GameObject gt = ht.select_random(randomizer, true);
 
     return gt;
+  }
+
+  private List<GameObject> get_all_tiles(int radius, int hexadrant, bool mark_used=true) {
+    return radius_tiles[radius][hexadrant].get_unused(mark_used);
   }
 }
 
@@ -196,15 +228,19 @@ public class HexadrantTiles {
     return data[indexref];
   }
 
-  public List<GameObject> get_unused() {
+  public List<GameObject> get_unused(bool mark_used=false) {
     List<GameObject> unused = new List<GameObject>();
 
     foreach (var i in unused_indices) {
       unused.Add(data[i]);
     }
 
+    if (mark_used) {
+      unused_indices = new List<int>();
+    }
+
     return unused;
   }
 }
 
-public enum TileType { preset_skill, any_stat, fixed_stat, any_skill };
+public enum TileType { preset_skill, any_stat, fixed_stat, any_skill, profession_border };
