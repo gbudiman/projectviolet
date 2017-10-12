@@ -4,11 +4,13 @@ using UnityEngine;
 
 public class HexGridMap : MonoBehaviour {
   public Dictionary<int, Dictionary<int, HexadrantTiles>> radius_tiles;
+  public Dictionary<int, Dictionary<int, Dictionary<int, GameObject>>> tiles;
   private Camera main_camera;
   private System.Random randomizer;
   const float camera_movement_speed = 0.25f;
   const float zoom_factor = 2f;
   const float mouse_pan_factor = -0.67f;
+  private bool debug_all_visible = false;
   int max_radius;
   enum MouseState { LeftPressed, RightPressed, None };
   MouseState mouse_state;
@@ -16,7 +18,7 @@ public class HexGridMap : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
     randomizer = new System.Random();
-    max_radius = 24;
+    max_radius = 23;
     make_map(max_radius);
     SkillLoader skl = GetComponent<SkillLoader>();
     skl.Build();
@@ -26,6 +28,7 @@ public class HexGridMap : MonoBehaviour {
 
     apply_skills_to_hex_grid_map(ss);
     populate_rest();
+    activate_ground_zero();
 	}
 	
 	// Update is called once per frame
@@ -48,6 +51,10 @@ public class HexGridMap : MonoBehaviour {
       main_camera.transform.Translate(camera_movement_speed, 0, 0);
     }
 
+    if (Input.GetKeyDown(KeyCode.H)) {
+      switch_visibility_state();
+    }
+
     if (Input.GetMouseButtonDown(1)) {
       mouse_state = MouseState.RightPressed;
     }
@@ -64,7 +71,33 @@ public class HexGridMap : MonoBehaviour {
     }
   }
 
+  private void switch_visibility_state() {
+    foreach (var a in tiles.Keys) {
+      foreach (var b in tiles[a].Keys) {
+        foreach (var c in tiles[a][b].Keys) {
+          tiles[a][b][c].GetComponent<HexGrid>().debug_reveal(!debug_all_visible);
+        }
+      }
+    }
+
+    debug_all_visible = !debug_all_visible;
+  }
+
+  private void activate_ground_zero() {
+    tiles[0][0][0].GetComponent<HexGrid>().reveal(true);
+  }
+
+  public bool has_adjacency_to_revealed_tile(List<List<int>> lints) {
+    foreach (List<int> lint in lints) {
+      GameObject gt = tiles[lint[0]][lint[1]][lint[2]];
+      if (gt.GetComponent<HexGrid>().is_revealed()) return true;
+    }
+
+    return false;
+  }
+
   private void make_map(int r) {
+    tiles = new Dictionary<int, Dictionary<int, Dictionary<int, GameObject>>>();
     radius_tiles = new Dictionary<int, Dictionary<int, HexadrantTiles>>();
 
     for (int x = -r; x <= r; x++) {
@@ -72,6 +105,10 @@ public class HexGridMap : MonoBehaviour {
         int z = -(x + y);
 
         if (Mathf.Abs(z) > r) continue;
+
+        if (!tiles.ContainsKey(x)) tiles[x] = new Dictionary<int, Dictionary<int, GameObject>>();
+        if (!tiles[x].ContainsKey(y)) tiles[x][y] = new Dictionary<int, GameObject>();
+        
         GameObject hex_sprite = (GameObject)Instantiate(Resources.Load("HexSprite"));
         HexGrid hex_grid = hex_sprite.GetComponent<HexGrid>();
 
@@ -90,7 +127,9 @@ public class HexGridMap : MonoBehaviour {
         }
 
         radius_tiles[radius][hexadrant].Add(hex_sprite);
-        //colorize(hex_sprite, r);
+        colorize(hex_sprite, r);
+
+        tiles[x][y][z] = hex_sprite;
 
         if (z > r) break;
       }
@@ -105,19 +144,45 @@ public class HexGridMap : MonoBehaviour {
 
     int hexadrant = hex_grid.hexadrant;
     int radius = hex_grid.radius;
+    bool is_profession_border = hex_grid.profession_border;
 
-    float multiplier = ((float) radius / (float) max_radius / 2.0f) + 0.5f;
-    float minorplier = ((float) radius / (float)max_radius) * 3f;
+    float hue = 0f;
+    float saturation = 0.5f;
+    float lightness = (float)radius / (float)max_radius * 0.25f + 0.25f;
 
-    switch (hexadrant) {
-      case 1: sprite.color = new Color(minorplier * 0.25f, multiplier * 0.75f, 0f); break;
-      case 4: sprite.color = new Color(multiplier * 0.75f, minorplier * 0.25f, 0f); break;
-      case 2: sprite.color = new Color(0f, minorplier * 0.25f, multiplier * 0.75f); break;
-      case 5: sprite.color = new Color(0f, multiplier * 0.75f, minorplier * 0.25f); break;
-      case 3: sprite.color = new Color(multiplier * 0.75f, 0f, minorplier * 0.25f); break;
-      case 6: sprite.color = new Color(minorplier * 0.25f, 0f, multiplier * 0.75f); break;
-      default: sprite.color = new Color(minorplier * 0.25f, minorplier * 0.25f, minorplier * 0.25f); break;
+    if (hexadrant < 0 || is_profession_border) {
+      hue = 0f;
+      //lightness = 0.25f;
+      saturation = 0f;
+      
+    } else if (hexadrant < 10) {
+      hue = (hexadrant - 1) * 60f / 360f;
+    } else {
+      int dihex = hexadrant / 10 - 1;
+      int mihex = hexadrant % 10 - 1;
+
+      hue = (dihex * 2 + mihex) * 30f / 360f;
+      if (mihex == 0) {
+        hue += 0.25f * 30f / 360f;
+      } else {
+        hue -= 0.25f * 30f / 360f;
+      }
+      
     }
+
+    sprite.color = Color.HSVToRGB(hue, saturation, lightness);
+    //float multiplier = ((float) radius / (float) max_radius / 2.0f) + 0.5f;
+    //float minorplier = ((float) radius / (float)max_radius) * 3f;
+
+    //switch (hexadrant) {
+    //  case 1: sprite.color = new Color(minorplier * 0.25f, multiplier * 0.75f, 0f); break;
+    //  case 4: sprite.color = new Color(multiplier * 0.75f, minorplier * 0.25f, 0f); break;
+    //  case 2: sprite.color = new Color(0f, minorplier * 0.25f, multiplier * 0.75f); break;
+    //  case 5: sprite.color = new Color(0f, multiplier * 0.75f, minorplier * 0.25f); break;
+    //  case 3: sprite.color = new Color(multiplier * 0.75f, 0f, minorplier * 0.25f); break;
+    //  case 6: sprite.color = new Color(minorplier * 0.25f, 0f, multiplier * 0.75f); break;
+    //  default: sprite.color = new Color(minorplier * 0.25f, minorplier * 0.25f, minorplier * 0.25f); break;
+    //}
   }
 
   private void apply_skills_to_hex_grid_map(SkillStruct ss) {
@@ -127,8 +192,6 @@ public class HexGridMap : MonoBehaviour {
 
       int target_hexadrant = skill_data.hexadrant;
       List<int> hxds = new List<int>();
-      int hxd_a = target_hexadrant;
-      int hxd_b = target_hexadrant;
 
       if (target_hexadrant == -1) {
         foreach (int k in radius_tiles[skill_data.radius].Keys) {
@@ -138,22 +201,23 @@ public class HexGridMap : MonoBehaviour {
         hxds.Add(target_hexadrant);
       }
 
-      //for (int hxd = hxd_a; hxd <= hxd_b; hxd++) {
       foreach (int hxd in hxds) { 
         if (skill_data.bias_method == "border") {
           foreach (GameObject gt in get_all_tiles(skill_data.radius, hxd)) {
             HexGrid hg = gt.GetComponent<HexGrid>();
             TextMesh tm = gt.GetComponentInChildren<TextMesh>();
+            hg.profession_border = true;
+            colorize(gt, max_radius);
 
             tm.text = skill_data.skill_name;
-            hg.set_color(TileType.profession_border, max_radius);
+            //hg.set_color(TileType.profession_border, max_radius);
           }
         } else {
           GameObject gt = get_available_tile(skill_data.radius, hxd);
           HexGrid hg = gt.GetComponent<HexGrid>();
           TextMesh tm = gt.GetComponentInChildren<TextMesh>();
           tm.text = skill_data.skill_name;
-          hg.set_color(TileType.preset_skill, max_radius);
+          //hg.set_color(TileType.preset_skill, max_radius);
         }
         
       }
@@ -162,8 +226,8 @@ public class HexGridMap : MonoBehaviour {
   }
 
   private void populate_rest() {
-    foreach (var radius_tile in radius_tiles.Values) {
-      foreach (KeyValuePair<int, HexadrantTiles> hexadrant_tile in radius_tile) {
+    foreach (KeyValuePair<int, Dictionary<int, HexadrantTiles>> radius_tile in radius_tiles) {
+      foreach (KeyValuePair<int, HexadrantTiles> hexadrant_tile in radius_tile.Value) {
         List<GameObject> remaining_tiles = hexadrant_tile.Value.get_unused();
 
         foreach (var tile in remaining_tiles) {
@@ -171,19 +235,17 @@ public class HexGridMap : MonoBehaviour {
           TextMesh tm = tile.GetComponentInChildren<TextMesh>();
           HexGrid hg = tile.GetComponent<HexGrid>();
 
-          /*if (randval == 99) {
-            tm.text = "Any Skill";
-            print("BINGO!");
-            hg.set_color(TileType.any_skill, max_radius);
-          } else*/ if (randval < 70) {
-            tm.text = "Maj Stat";
-            hg.set_color(TileType.fixed_stat, max_radius);
-          } else {
+          if (radius_tile.Key < 9) {
             tm.text = "Any Stat";
-            hg.set_color(TileType.any_stat, max_radius);
+          } else {
+            if (randval < 70) {
+              tm.text = "Maj Stat";
+              //hg.set_color(TileType.fixed_stat, max_radius);
+            } else {
+              tm.text = "Any Stat";
+              //hg.set_color(TileType.any_stat, max_radius);
+            }
           }
-
-          // hg.set_color(TileType.any_stat, max_radius);
         }
         
       }
