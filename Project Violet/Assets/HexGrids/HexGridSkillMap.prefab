@@ -19,10 +19,10 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 4914039901409268}
-  - component: {fileID: 114023134871167332}
-  - component: {fileID: 114174226060954328}
+  - component: {fileID: 114196023109449272}
+  - component: {fileID: 114900797976338394}
   m_Layer: 0
-  m_Name: HexGridMap
+  m_Name: HexGridSkillMap
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -41,7 +41,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &114023134871167332
+--- !u!114 &114196023109449272
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
@@ -49,10 +49,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 1253323509418888}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f53570f43f6ce5848898bb52e836e39c, type: 3}
+  m_Script: {fileID: 11500000, guid: fb5585aca176f174ba5ce89b2a460c1f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &114174226060954328
+--- !u!114 &114900797976338394
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
@@ -60,6 +60,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 1253323509418888}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bf7df89bfd19c4245952d5ad7ef98174, type: 3}
+  m_Script: {fileID: 11500000, guid: ea7275925ee1dc94ca86dd73606206ff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 

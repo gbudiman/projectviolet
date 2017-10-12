@@ -11,7 +11,7 @@ public class HexGrid : MonoBehaviour {
   private bool revealed;
   public bool profession_border = false;
   const int dihex_radius_cutoff = 14;
-  HexGridMap hex_grid_map = null;
+  HexGridBase hex_grid_map = null;
 
 	// Use this for initialization
 	void Start () {
@@ -50,7 +50,7 @@ public class HexGrid : MonoBehaviour {
   }
 
   public void reveal(bool forced=false) {
-    if (hex_grid_map == null) hex_grid_map = FindObjectOfType<HexGridMap>();
+    if (hex_grid_map == null) hex_grid_map = FindObjectOfType<HexGridBase>();
 
     if (!revealed) {
       if (forced || hex_grid_map.has_adjacency_to_revealed_tile(get_adjacents())) {
