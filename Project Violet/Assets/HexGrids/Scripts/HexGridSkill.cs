@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class HexGridSkill : HexGridBase {
-
 	// Use this for initialization
 	void Start () {
     base.Start();
+
+    ColorizeMethod colorizer = colorize;
+    make_map(23, colorizer);
 
     SkillLoader skl = GetComponent<SkillLoader>();
     skl.Build();
@@ -91,5 +93,40 @@ public class HexGridSkill : HexGridBase {
 
   private void activate_ground_zero() {
     tiles[0][0][0].GetComponent<HexGrid>().reveal(true);
+  }
+
+  private void colorize(GameObject hex_sprite, int max_radius) {
+    HexGrid hex_grid = hex_sprite.GetComponent<HexGrid>();
+    SpriteRenderer sprite = hex_grid.GetComponent<SpriteRenderer>();
+
+    int hexadrant = hex_grid.hexadrant;
+    int radius = hex_grid.radius;
+    bool is_profession_border = hex_grid.profession_border;
+
+    float hue = 0f;
+    float saturation = 0.5f;
+    float lightness = (float)radius / (float)max_radius * 0.25f + 0.25f;
+
+    if (hexadrant < 0 || is_profession_border) {
+      hue = 0f;
+      //lightness = 0.25f;
+      saturation = 0f;
+
+    } else if (hexadrant < 10) {
+      hue = (hexadrant - 1) * 60f / 360f;
+    } else {
+      int dihex = hexadrant / 10 - 1;
+      int mihex = hexadrant % 10 - 1;
+
+      hue = (dihex * 2 + mihex) * 30f / 360f;
+      if (mihex == 0) {
+        hue += 0.25f * 30f / 360f;
+      } else {
+        hue -= 0.25f * 30f / 360f;
+      }
+
+    }
+
+    sprite.color = Color.HSVToRGB(hue, saturation, lightness);
   }
 }

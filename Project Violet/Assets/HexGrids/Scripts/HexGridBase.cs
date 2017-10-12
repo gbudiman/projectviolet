@@ -8,18 +8,20 @@ public class HexGridBase : MonoBehaviour {
   private Camera main_camera;
   protected System.Random randomizer;
   const float camera_movement_speed = 0.25f;
-  const float zoom_factor = 2f;
-  const float mouse_pan_factor = -0.67f;
+  protected float zoom_factor = 2f;
+  protected float mouse_pan_factor = -0.67f;
   private bool debug_all_visible = false;
   protected int max_radius;
   enum MouseState { LeftPressed, RightPressed, None };
   MouseState mouse_state;
 
+  protected delegate void ColorizeMethod(GameObject g, int r);
+
 	// Use this for initialization
 	protected void Start () {
     randomizer = new System.Random();
     max_radius = 23;
-    make_map(max_radius);
+    //make_map(max_radius);
     
     main_camera = GameObject.Find("Main Camera").GetComponent<Camera>();
     mouse_state = MouseState.None;
@@ -90,7 +92,7 @@ public class HexGridBase : MonoBehaviour {
     return false;
   }
 
-  private void make_map(int r) {
+  protected void make_map(int r, ColorizeMethod colorize) {
     tiles = new Dictionary<int, Dictionary<int, Dictionary<int, GameObject>>>();
     radius_tiles = new Dictionary<int, Dictionary<int, HexadrantTiles>>();
 
@@ -132,52 +134,7 @@ public class HexGridBase : MonoBehaviour {
     }
   }
 
-  protected void colorize(GameObject hex_sprite, int max_radius) {
-    HexGrid hex_grid = hex_sprite.GetComponent<HexGrid>();
-    SpriteRenderer sprite = hex_grid.GetComponent<SpriteRenderer>();
 
-    int hexadrant = hex_grid.hexadrant;
-    int radius = hex_grid.radius;
-    bool is_profession_border = hex_grid.profession_border;
-
-    float hue = 0f;
-    float saturation = 0.5f;
-    float lightness = (float)radius / (float)max_radius * 0.25f + 0.25f;
-
-    if (hexadrant < 0 || is_profession_border) {
-      hue = 0f;
-      //lightness = 0.25f;
-      saturation = 0f;
-      
-    } else if (hexadrant < 10) {
-      hue = (hexadrant - 1) * 60f / 360f;
-    } else {
-      int dihex = hexadrant / 10 - 1;
-      int mihex = hexadrant % 10 - 1;
-
-      hue = (dihex * 2 + mihex) * 30f / 360f;
-      if (mihex == 0) {
-        hue += 0.25f * 30f / 360f;
-      } else {
-        hue -= 0.25f * 30f / 360f;
-      }
-      
-    }
-
-    sprite.color = Color.HSVToRGB(hue, saturation, lightness);
-    //float multiplier = ((float) radius / (float) max_radius / 2.0f) + 0.5f;
-    //float minorplier = ((float) radius / (float)max_radius) * 3f;
-
-    //switch (hexadrant) {
-    //  case 1: sprite.color = new Color(minorplier * 0.25f, multiplier * 0.75f, 0f); break;
-    //  case 4: sprite.color = new Color(multiplier * 0.75f, minorplier * 0.25f, 0f); break;
-    //  case 2: sprite.color = new Color(0f, minorplier * 0.25f, multiplier * 0.75f); break;
-    //  case 5: sprite.color = new Color(0f, multiplier * 0.75f, minorplier * 0.25f); break;
-    //  case 3: sprite.color = new Color(multiplier * 0.75f, 0f, minorplier * 0.25f); break;
-    //  case 6: sprite.color = new Color(minorplier * 0.25f, 0f, multiplier * 0.75f); break;
-    //  default: sprite.color = new Color(minorplier * 0.25f, minorplier * 0.25f, minorplier * 0.25f); break;
-    //}
-  }
 
   protected GameObject get_available_tile(int radius, int hexadrant) {
     HexadrantTiles ht = radius_tiles[radius][hexadrant];
