@@ -5,7 +5,7 @@ using UnityEngine;
 public class HexGridCoord {
   const float x_scaler = 1f;
   const float y_scaler = 0.85f;
-  private int a, b, c;
+  public int a, b, c;
 	
   public HexGridCoord() {
     a = b = c = 0;
@@ -19,6 +19,10 @@ public class HexGridCoord {
     a = _a;
     b = _b;
     c = _c;
+  }
+
+  public bool equals(HexGridCoord other) {
+    return (other.a == a && other.b == b && other.c == c);
   }
 
   public Vector3 get_planar_coordinate() {
@@ -42,6 +46,19 @@ public class HexGridCoord {
     a = a_translate * multiples;
     b = b_translate * multiples;
     c = c_translate * multiples;
+  }
+
+  public List<HexGridCoord> get_adjacent_grids() {
+    return new List<HexGridCoord>() {
+      new HexGridCoord(a + 1, b    , c - 1 ),
+      new HexGridCoord(a,     b + 1, c - 1 ),
+      new HexGridCoord(a - 1, b + 1, c ),
+      new HexGridCoord(a - 1, b    , c + 1 ),
+      new HexGridCoord(a    , b - 1, c + 1 ),
+      new HexGridCoord(a + 1, b - 1, c     )
+  };
+
+ 
   }
 
   public int get_hexadrant() {

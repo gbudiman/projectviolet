@@ -8,26 +8,30 @@ public class ActiveUnit{
   public float ap_increment;
   public string name;
   GameObject panel;
-  protected GameObject marker;
-  public RectTransform marker_transform;
+  protected GameObject timeline_marker;
+  public RectTransform timeline_marker_transform;
   ActiveUnitMarker active_unit_marker;
   protected float timeline_length = 670 + 300;
   protected float segment = 5f;
+  HexGridCoord position;
+  public GameObject map_marker;
 	// Use this for initialization
 
-  public ActiveUnit(ActiveUnitMarker _active_unit_marker, string _name, float _ap_increment = 20f) {
+  public ActiveUnit(ActiveUnitMarker _active_unit_marker, string _name, HexGridCoord _position, float _ap_increment = 20f) {
     panel = GameObject.FindGameObjectWithTag("TagTimeline");
     name = _name;
     ap_increment = _ap_increment;
     active_unit_marker = _active_unit_marker;
+    position = _position;
 
     add_timeline_marker();
+    map_marker = active_unit_marker.visualize(position);
   }
 
   void add_timeline_marker() {
-    marker = active_unit_marker.spawn(panel, name);
-    marker_transform = marker.GetComponent<RectTransform>();
-    marker_transform.anchoredPosition = new Vector3(0, -330, 0);
+    timeline_marker = active_unit_marker.spawn(panel, name);
+    timeline_marker_transform = timeline_marker.GetComponent<RectTransform>();
+    timeline_marker_transform.anchoredPosition = new Vector3(0, -330, 0);
     //marker = new Vector3(0f, -330f, 0f);
   }
 
@@ -36,7 +40,7 @@ public class ActiveUnit{
   }
 
   void set_marker_position(float x) {
-    marker_transform.anchoredPosition = new Vector3(x, -330, 0);
+    timeline_marker_transform.anchoredPosition = new Vector3(x, -330, 0);
   }
 
   public Dictionary<string, KeyValuePair<string, float>> generate_actions() {

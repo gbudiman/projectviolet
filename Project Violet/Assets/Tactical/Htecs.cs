@@ -59,8 +59,21 @@ public class Htecs {
 
   void test_harness() {
     active_units = new List<ActiveUnit>();
+    List<HexGridCoord> preset = new List<HexGridCoord>() {
+      new HexGridCoord(2,0,-2),
+      new HexGridCoord(2,1,-3),
+      new HexGridCoord(-1,0,1),
+      new HexGridCoord(0,-1,1),
+      new HexGridCoord(-1,-1,2),
+      new HexGridCoord(-5,4,1),
+      new HexGridCoord(-5,5,0),
+      new HexGridCoord(-5,6,-1),
+      new HexGridCoord(-3,6,-3),
+      new HexGridCoord(-6,2,4),
+    };
+
     for (int i = 10; i < 20; i++) {
-      active_units.Add(new ActiveUnit(active_unit_marker, "Unit_" + (i).ToString(), i * 2));
+      active_units.Add(new ActiveUnit(active_unit_marker, "Unit_" + (i).ToString(), preset[i-10], i * 2));
     }
   }
 }

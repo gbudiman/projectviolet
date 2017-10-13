@@ -34,6 +34,14 @@ public class HexGridBase : MonoBehaviour {
     update_camera();
 	}
 
+  public GameObject get_at_abc(int a, int b, int c) {
+    return tiles[a][b][c];
+  }
+
+  public GameObject get_at_abc(HexGridCoord hxc) {
+    return get_at_abc(hxc.a, hxc.b, hxc.c);
+  }
+
   private void update_camera() {
     Vector3 current_position = main_camera.transform.position;
     Vector3 target_position = new Vector3(0,0,0);
@@ -92,7 +100,7 @@ public class HexGridBase : MonoBehaviour {
     return false;
   }
 
-  protected void make_map(int r, ColorizeMethod colorize) {
+  protected void make_map(int r, ColorizeMethod colorize, string prefab_name) {
     tiles = new Dictionary<int, Dictionary<int, Dictionary<int, GameObject>>>();
     radius_tiles = new Dictionary<int, Dictionary<int, HexadrantTiles>>();
 
@@ -105,7 +113,7 @@ public class HexGridBase : MonoBehaviour {
         if (!tiles.ContainsKey(x)) tiles[x] = new Dictionary<int, Dictionary<int, GameObject>>();
         if (!tiles[x].ContainsKey(y)) tiles[x][y] = new Dictionary<int, GameObject>();
         
-        GameObject hex_sprite = (GameObject)Instantiate(Resources.Load("HexSprite"));
+        GameObject hex_sprite = (GameObject)Instantiate(Resources.Load(prefab_name));
         HexGrid hex_grid = hex_sprite.GetComponent<HexGrid>();
 
         Vector3 pl = hex_grid.spawn(x, y, z);

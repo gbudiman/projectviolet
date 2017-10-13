@@ -9,6 +9,8 @@ public class HexGrid : MonoBehaviour {
   public int hexadrant;
   public int radius;
   private bool revealed;
+  private bool highlighted = false;
+  private bool midlighted = false;
   public bool profession_border = false;
   const int dihex_radius_cutoff = 14;
   HexGridBase hex_grid_map = null;
@@ -23,6 +25,44 @@ public class HexGrid : MonoBehaviour {
 		
 	}
 
+  public void unhighlight() {
+    if (highlighted) {
+      highlight(false);
+    }
+
+    if (midlighted) {
+      midlight(false);
+    }
+  }
+
+  public void highlight(bool val) {
+    SpriteRenderer sr = GetComponent<SpriteRenderer>();
+    float h, s, l;
+    Color.RGBToHSV(sr.color, out h, out s, out l);
+
+    if (!highlighted && val) {
+      sr.color = Color.HSVToRGB(h, s, l + 0.5f);
+      highlighted = true;
+    } else if (highlighted && !val) {
+      sr.color = Color.HSVToRGB(h, s, l - 0.5f);
+      highlighted = false;
+    }
+  }
+
+  public void midlight(bool val) {
+    SpriteRenderer sr = GetComponent<SpriteRenderer>();
+    float h, s, l;
+    Color.RGBToHSV(sr.color, out h, out s, out l);
+
+    if (!midlighted && val) {
+      sr.color = Color.HSVToRGB(h, s - 0.7f, l + 0.15f);
+      midlighted = true;
+    } else if (midlighted && !val) {
+      sr.color = Color.HSVToRGB(h, s + 0.7f, l - 0.15f);
+      midlighted = false;
+    }
+  }
+
   public Vector3 spawn(int x, int y, int z) {
 
     hex_grid_coord = new HexGridCoord(x, y, z);
@@ -33,7 +73,7 @@ public class HexGrid : MonoBehaviour {
     return pl;
   }
 
-  private List<List<int>> get_adjacents() {
+  protected List<List<int>> get_adjacents() {
     int a = (int) abc_coord.x;
     int b = (int) abc_coord.y;
     int c = (int) abc_coord.z;
@@ -84,7 +124,7 @@ public class HexGrid : MonoBehaviour {
     reveal();
   }
 
-  private void update_debug_info(Vector3 pl, int x, int y, int z) {
+  protected void update_debug_info(Vector3 pl, int x, int y, int z) {
     abc_coord = new Vector3(x, y, z);
     xyz_coord = pl;
     radius = hex_grid_coord.get_radius();

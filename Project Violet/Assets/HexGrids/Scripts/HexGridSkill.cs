@@ -8,7 +8,7 @@ public class HexGridSkill : HexGridBase {
     base.Start();
 
     ColorizeMethod colorizer = colorize;
-    make_map(23, colorizer);
+    make_map(23, colorizer, "SkillTile");
 
     SkillLoader skl = GetComponent<SkillLoader>();
     skl.Build();

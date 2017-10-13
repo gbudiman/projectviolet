@@ -10,7 +10,7 @@ public class HexGridTacticalMap : HexGridBase {
 
     zoom_factor = 4f;
     ColorizeMethod colorizer = colorize;
-    make_map(32, colorizer);
+    make_map(32, colorizer, "TacticalTile");
 	}
 	
 	// Update is called once per frame
